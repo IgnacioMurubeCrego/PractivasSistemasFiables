@@ -85,6 +85,7 @@ begin
       sig_in    => BTN_sync, -- Synchronized input from the synchronizer
       debounced => toggle_LED -- Output to the toggle LED process
     );
+    
   -- SYNCHRONIZER
   synchronizer_inst: synchronizer
     generic map (
@@ -97,6 +98,7 @@ begin
       data_in  => BTNC,
       data_out => BTN_sync
     );
+    
   --  PROCESS to register LED output 
   registerLED: process(clk100Mhz, rst_n) is
   begin
@@ -114,6 +116,7 @@ begin
 	  -- -----------------------------------------------------------------------------
     end if;
   end process;  
+  
   -- PROCESS to toggle LED
   toggleLED: process(LED_register, Toggle_LED)
   begin 
@@ -121,7 +124,9 @@ begin
     state_LED <= not state_LED;
   -- -----------------------------------------------------------------------------		
   end process;
+  
   -- Connect LED_register to the output
   LED <= LED_register;
+  
 end behavioural;
   

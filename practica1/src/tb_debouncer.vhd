@@ -23,13 +23,15 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity tb_debouncer is
 end tb_debouncer;
 
 architecture testBench of tb_debouncer is
   component debouncer is
-    generic(
+    generic (
         g_timeout          : integer   := 5;        -- Time in ms
         g_clock_freq_KHZ   : integer   := 100_000   -- Frequency in KHz of the system 
     );   
@@ -38,14 +40,9 @@ architecture testBench of tb_debouncer is
         clk         : in    std_logic;
         ena         : in    std_logic;
         sig_in      : in    std_logic;
-        debounced   : out   std_logic;
-        count : out integer;
-        time_out : out std_logic
+        debounced   : out   std_logic
     ); 
   end component;
-  
-  signal counter : integer := 0;
-  signal time_elapsed : std_logic := '0';
   
   constant timer_debounce : integer := 10; --ms
   constant freq : integer := 100_000; --KHZ
@@ -54,15 +51,13 @@ architecture testBench of tb_debouncer is
   signal  rst_n       :   std_logic := '0';
   signal  clk         :   std_logic := '0';
   signal  ena         :   std_logic := '1';
-  signal  BTN_sync      :   std_logic := '0';
+  signal  BTN_sync    :   std_logic := '0';
   -- Output
-  signal  debounced   :   std_logic := '0';
-  --Senhal fin de simulacion
+  signal  debounced   :   std_logic;
+  -- Senhal fin de simulacion
   signal  fin_sim : boolean := false;
   
 begin
-
-
   UUT: debouncer
     generic map (
       g_timeout        => timer_debounce,
@@ -73,18 +68,16 @@ begin
       clk       => clk,
       ena       => ena,
       sig_in    => BTN_sync,
-      debounced => debounced,
-      count => counter,
-      time_out => time_elapsed
+      debounced => debounced
     );
-	
-  --Proceso de generacion del reloj 
+  
+  -- Proceso de generacion del reloj 
   clock: process
   begin
       clk <= '0';
-      wait for clk_period/2;
+      wait for clk_period / 2;
       clk <= '1';
-      wait for clk_period/2;
+      wait for clk_period / 2;
       if fin_sim = true then
         wait;
       end if;
@@ -92,57 +85,58 @@ begin
   
   process is 
   begin
-		-- Secuencia de reset
-		wait until clk'event and clk = '1';
-		wait until clk'event and clk = '1';
-		rst_n <= '1';                         -- Reset inactivo
-		wait until clk'event and clk = '1';
-		rst_n <= '0';                         -- Reset activo
-		wait until clk'event and clk = '1';
-		rst_n <= '1';                         -- Reset inactivo
-		--Fin de secuencia de reset
+    -- Secuencia de reset
+    wait until rising_edge(clk);
+    wait until rising_edge(clk);
+    rst_n <= '1';                         -- Reset inactivo
+    wait until rising_edge(clk);
+    rst_n <= '0';                         -- Reset activo
+    wait until rising_edge(clk);
+    rst_n <= '1';                         -- Reset inactivo
+    -- Fin de secuencia de reset
     
     -- Btn on with noise
     wait for 50 ns;
     wait until rising_edge(clk);
-    BTN_sync <='1';
-    wait for 100 ns;
+    BTN_sync <= '1';
+    wait for 20 ns;
     wait until rising_edge(clk);
     BTN_sync <= '0';
-    wait for 100 ns;
+    wait for 20 ns;
     wait until rising_edge(clk);
-    BTN_sync <='1';
-    wait for 20 ms;
+    BTN_sync <= '1';
+    wait for 100 ns;
     
     -- False boton off 
     wait until rising_edge(clk);
-    BTN_sync <='0';
-    wait for 50 ns;
+    BTN_sync <= '0';
+    wait for 20 ns;
     wait until rising_edge(clk);
-    BTN_sync <='1';
-    wait for 20 ms;
+    BTN_sync <= '1';
+    wait for 100 ns;
     
     -- Boton off with noise
     wait until rising_edge(clk);
-    BTN_sync <='0';
-    wait for 50 ns;
+    BTN_sync <= '0';
+    wait for 20 ns;
     wait until rising_edge(clk);
-    BTN_sync <='1';
-    wait for 50 ns;
+    BTN_sync <= '1';
+    wait for 20 ns;
     wait until rising_edge(clk);
-    BTN_sync <='0';
-    wait for 20 ms;
+    BTN_sync <= '0';
+    wait for 100 ns;
     
     -- False boton on
     wait until rising_edge(clk);
-    BTN_sync <='1';
-    wait for 50 ns;
+    BTN_sync <= '1';
+    wait for 20 ns;
     wait until rising_edge(clk);
-    BTN_sync <='0';
-    wait for 20 ms;
+    BTN_sync <= '0';
+    wait for 100 ns;
     
     wait until rising_edge(clk);
-	-- Fin simulacion
-	fin_sim <= true;			 
+    -- Fin simulacion
+    fin_sim <= true;			 
   end process;
 end testBench;
+		
