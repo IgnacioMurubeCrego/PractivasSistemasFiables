@@ -43,6 +43,8 @@ architecture Behavioural of debouncer is
     constant c_cycles           : integer := integer(g_timeout * g_clock_freq_KHZ);
     -- Calculate the length of the counter so the count fits
     constant c_counter_width    : integer := integer(ceil(log2(real(c_cycles))));
+    constant c_max_cycles : unsigned(c_counter_width-1 downto 0) :=
+    to_unsigned(c_cycles, c_counter_width);
     
     -- -----------------------------------------------------------------------------
     -- Declarar un tipo para los estados de la FSM usando type
@@ -62,12 +64,12 @@ begin
         time_elapsed <= '0';    
         counter <= (others => '0');
     elsif rising_edge(clk) then
+        time_elapsed <= '0';
         if en_count = '1' then
             report "counting";
             counter <= counter + 1;
-            if counter = c_cycles then
+            if counter = c_max_cycles then
                 report "time elapsed";
-                en_count <= '0';
                 counter <= (others => '0');
                 time_elapsed <= '1';
             end if;
@@ -90,6 +92,7 @@ end process;
     begin
         case CS is
             when IDLE =>
+                en_count <= '0';
                 report "IDLE";
                 if sig_in = '1' then
                     NS <= BTN_PRS;
@@ -107,6 +110,7 @@ end process;
                     en_count <= '1';
                 end if;
             when VALID => 
+                en_count <= '0';
                 report "VALID";
                 if ena = '0' then
                     NS <= IDLE;

@@ -44,7 +44,7 @@ architecture testBench of tb_debouncer is
     ); 
   end component;
   
-  constant timer_debounce : integer := 10; --ms
+  constant timer_debounce : integer := 5; --ms
   constant freq : integer := 100_000; --KHZ
   constant clk_period : time := (1 ms/ freq);
   -- Inputs 
@@ -98,41 +98,41 @@ begin
     -- Btn on with noise
     wait for 50 ns;
     wait until rising_edge(clk);
-    BTN_sync <= '1';
-    wait for 20 ns;
+    BTN_sync <='1';
+    wait for 100 ns;
     wait until rising_edge(clk);
     BTN_sync <= '0';
-    wait for 20 ns;
-    wait until rising_edge(clk);
-    BTN_sync <= '1';
     wait for 100 ns;
+    wait until rising_edge(clk);
+    BTN_sync <='1';
+    wait for 5 ms;
     
     -- False boton off 
     wait until rising_edge(clk);
-    BTN_sync <= '0';
-    wait for 20 ns;
+    BTN_sync <='0';
+    wait for 50 ns;
     wait until rising_edge(clk);
-    BTN_sync <= '1';
-    wait for 100 ns;
+    BTN_sync <='1';
+    wait for 1 ms;
     
     -- Boton off with noise
     wait until rising_edge(clk);
-    BTN_sync <= '0';
-    wait for 20 ns;
+    BTN_sync <='0';
+    wait for 50 ns;
     wait until rising_edge(clk);
-    BTN_sync <= '1';
-    wait for 20 ns;
+    BTN_sync <='1';
+    wait for 50 ns;
     wait until rising_edge(clk);
-    BTN_sync <= '0';
-    wait for 100 ns;
+    BTN_sync <='0';
+    wait for 5 ms;
     
     -- False boton on
     wait until rising_edge(clk);
-    BTN_sync <= '1';
-    wait for 20 ns;
+    BTN_sync <='1';
+    wait for 50 ns;
     wait until rising_edge(clk);
-    BTN_sync <= '0';
-    wait for 100 ns;
+    BTN_sync <='0';
+    wait for 1 ms;
     
     wait until rising_edge(clk);
     -- Fin simulacion
