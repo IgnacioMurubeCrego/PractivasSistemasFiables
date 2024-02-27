@@ -110,9 +110,7 @@ begin
     elsif rising_edge(clk100Mhz) then
 	  -- -----------------------------------------------------------------------------	
       -- Registrar valor
-      if Toggle_LED = '1' then
         LED_register <= state_LED;
-      end if;
 	  -- -----------------------------------------------------------------------------
     end if;
   end process;  
@@ -121,7 +119,7 @@ begin
   toggleLED: process(LED_register, Toggle_LED)
   begin 
   -- -----------------------------------------------------------------------------
-    state_LED <= not state_LED;
+     state_LED <= Toggle_LED XOR LED_register;
   -- -----------------------------------------------------------------------------		
   end process;
   
@@ -129,4 +127,3 @@ begin
   LED <= LED_register;
   
 end behavioural;
-  
