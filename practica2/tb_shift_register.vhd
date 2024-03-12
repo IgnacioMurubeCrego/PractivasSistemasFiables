@@ -55,6 +55,9 @@ architecture testBench of tb_shift_register is
   signal din		:  std_logic := '0';-- Serial IN. One bit serial input
   signal D      	: std_logic_vector(g_N-1 downto 0) := (others => '0');-- Paralel IN. Vector of generic g_n bits.
   
+  signal test_din_rotr : std_logic_vector(7 downto 0) := "10110000"; -- Input vector for din values to test right rotation
+  signal test_din_rotl : std_logic_vector(7 downto 0) := "11001110"; -- Input vector for din values to test left rotation
+  
   -- Output
   signal  dout 		:  std_logic;-- Synchronous clock at the g_freq_SCLK_KHZ
   signal  Q	        :  std_logic_vector(g_N-1 downto 0);-- one cycle signal of the rising edge of SCLK
@@ -79,6 +82,13 @@ begin
 	-----------------------------------------------              
 	-- Genere el proceso para un reloj
 	-----------------------------------------------
+	process is
+	begin
+	   clk <= '0';
+	   wait for clk_period/2;
+	   clk <= '1';
+	   wait for clk_period/2;
+	end process;
 	
   process is 
   begin
@@ -97,7 +107,37 @@ begin
     -- Recuerda probar tanto la entrada en serie como la carga en paralelo, y ambos desplazamientos izq y drch
     --------------------------
     
+    -- Test Right rotation
+    s0 <= '1';
+    s1 <= '0';
+    for i in 0 to 7 loop
+        din <= test_din_rotr(7-i);
+        wait for clk_period;
+    end loop;
+    
+    wait for clk_period;
+    
+    -- Test Left rotation
+    s0 <= '0';
+    s1 <= '1';
+    for i in 0 to 7 loop
+        din <= test_din_rotl(i);
+        wait for clk_period;
+    end loop;
+    
+    wait for clk_period;
+    
+    -- Test paralel charge
+    s0 <= '1';
+    s1 <= '1';
+    D <= "1101"; -- paralel charge test value 'd'
+    wait for clk_period;
+    D <= "0000";
+      
+      
+      wait for 10 * clk_period;  -- Espera 10 ciclos de reloj    
     -- Finalizar simulacion
+    wait;
 
   end process;
 end testBench;
