@@ -66,10 +66,10 @@ begin
     elsif rising_edge(clk) then
         time_elapsed <= '0';
         if en_count = '1' then
-            report "counting";
+            --report "counting";
             counter <= counter + 1;
             if counter = c_max_cycles then
-                report "time elapsed";
+                --report "time elapsed";
                 counter <= (others => '0');
                 time_elapsed <= '1';
             end if;
@@ -93,12 +93,12 @@ end process;
         case CS is
             when IDLE =>
                 en_count <= '0';
-                report "IDLE";
+                --report "IDLE";
                 if sig_in = '1' then
                     NS <= BTN_PRS;
                 end if;
             when BTN_PRS =>
-                report "BTN_PRS";
+                --report "BTN_PRS";
                 if ena = '0' then
                     NS <= IDLE;
                 elsif time_elapsed = '1' and sig_in = '0' then
@@ -106,25 +106,25 @@ end process;
                 elsif (time_elapsed = '1' and sig_in = '1') then
                     NS <= VALID;
                 else
-                    report "count enabled";
+                    --report "count enabled";
                     en_count <= '1';
                 end if;
             when VALID => 
                 en_count <= '0';
-                report "VALID";
+                --report "VALID";
                 if ena = '0' then
                     NS <= IDLE;
                 elsif sig_in = '0' then
                     NS <= BTN_UNPRS;
                 end if;
             when BTN_UNPRS => 
-                report "BTN_UNPRS";
+                --report "BTN_UNPRS";
                 if ena = '0' or (time_elapsed = '1' and sig_in = '0') then
                     NS <= IDLE;
                 elsif time_elapsed = '1' and sig_in = '1' then
                     NS <= VALID;
                 else
-                    report "count enabled";
+                    --report "count enabled";
                     en_count <= '1';
                 end if;              
             when others =>

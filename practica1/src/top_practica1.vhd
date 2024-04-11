@@ -16,7 +16,7 @@
 --   Ver  :| Author            :| Mod. Date :|    Changes Made:
 
 --   v1.0  | Ignacio Aznarez   :| 02/24     :| First version
-
+--   v1.1  | Ignacio Murube ; Juan Manuel Vicente ; Jesus Navas :| 02/24 : Completed First Version
 -- -----------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;

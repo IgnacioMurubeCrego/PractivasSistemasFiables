@@ -30,6 +30,12 @@ end tb_top;
 
 architecture testBench of tb_top is
   component top_practica1 is
+  generic (
+      g_sys_clock_freq_KHZ  : integer := 100e3; -- Value of the clock frequencies in KHz
+      g_debounce_time 		: integer := 20;  -- Time for the debouncer in ms
+      g_reset_value 		: std_logic := '0'; -- Value for the synchronizer 
+      g_number_flip_flps 	: natural := 2 	-- Number of ffs used to synchronize	
+  );
   port (
       rst_n         : in std_logic;
       clk100Mhz     : in std_logic;
@@ -38,7 +44,7 @@ architecture testBench of tb_top is
   );
 end component;
 
-  constant timer_debounce : integer := 10; --ms
+  constant timer_debounce : integer := 1; --ms
   constant freq : integer := 100_000; --KHZ
   constant clk_period : time := (1 ms/ freq);
 
@@ -53,6 +59,7 @@ end component;
   
 begin
   UUT: top_practica1
+  generic map(g_debounce_time => timer_debounce)
     port map (
       rst_n     => rst_n,
       clk100Mhz => clk,
@@ -86,33 +93,38 @@ begin
     
     wait for 13 ns;
     wait until rising_edge(clk);
+    
     -- Btn on with noise
     BTN <='1';
-    wait for 235 ns;
     wait until rising_edge(clk);
+    wait for 200 ns;
     BTN <= '0';
-    wait for 166 ns;
     wait until rising_edge(clk);
+    wait for 200 ns;
     BTN <='1';
-    wait for 20 ms;
     wait until rising_edge(clk);
-    -- False boton off 
-    BTN <='0';
-    wait for 164 ns;
+    wait for 2 ms;
+    BTN <= '0';
     
+    -- False boton off 
     BTN <='1';
-    wait for 20 ms;
-    wait until rising_edge(clk);    
-    -- Boton off with noise
-    BTN <='0';
-    wait for 150 ns;
-    wait until rising_edge(clk);    
-    BTN <='1';
-    wait for 162 ns;
-    wait until rising_edge(clk);    
-    BTN <='0';
-    wait for 20 ms; 
     wait until rising_edge(clk);
+    wait for 200 ns;
+    BTN <='0';
+    wait until rising_edge(clk);
+    wait for 2 ms;
+    
+    -- Boton off with noise
+    BTN <='1';
+    wait until rising_edge(clk);
+    wait for 200 ns;
+    BTN <='0';
+    wait until rising_edge(clk);
+    wait for 200 ns;
+    BTN <='1';
+    wait until rising_edge(clk);
+    wait for 2 ms; 
+    
 	-- Fin simulacion
 	fin_sim <= true;
   end process;
