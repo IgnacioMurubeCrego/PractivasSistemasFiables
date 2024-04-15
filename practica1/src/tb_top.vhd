@@ -91,7 +91,7 @@ begin
 		rst_n <= '1';                         -- Reset inactivo
 		--Fin de secuencia de reset
     
-    wait for 13 ns;
+    wait for 500000 ns;
     wait until rising_edge(clk);
     
     -- Btn on with noise
@@ -105,11 +105,12 @@ begin
     wait until rising_edge(clk);
     wait for 2 ms;
     BTN <= '0';
+    wait for 500000 ns;
     
     -- False boton off 
     BTN <='1';
     wait until rising_edge(clk);
-    wait for 200 ns;
+    wait for 500000 ns;
     BTN <='0';
     wait until rising_edge(clk);
     wait for 2 ms;
@@ -124,6 +125,17 @@ begin
     BTN <='1';
     wait until rising_edge(clk);
     wait for 2 ms; 
+    
+    -- False boton on 
+    BTN <='0';
+    wait until rising_edge(clk);
+    wait for 500000 ns;
+    BTN <='1';
+    wait until rising_edge(clk);
+    wait for 500000 ns;
+    BTN <='0';
+    wait until rising_edge(clk);
+    wait for 2 ms;
     
 	-- Fin simulacion
 	fin_sim <= true;
