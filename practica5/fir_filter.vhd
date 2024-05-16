@@ -2,7 +2,7 @@
 --
 -- Title       : 	FIR filter
 -- Design      :	
--- Author      :	Ignacio Aznárez ramos
+-- Author      :	Ignacio Azn?rez ramos
 -- Company     :	Universidad de Nebrija
 --------------------------------------------------------------------------------
 -- File        : fir.vhd
@@ -18,6 +18,7 @@
 --   Ver  :| Author            :| Mod. Date :|    Changes Made:
 
 --   v1.0  | Ignacio Aznarez     :| 03/05/22  :| First version
+--   v2.0  | Ignacio Murube Crego ; Juan Manuel Vicente Martin ; Javier Navas :| 10/05/24 :| Completed Lab
 
 
 -- -----------------------------------------------------------------------------
@@ -53,7 +54,7 @@ architecture rtl of fir_filter is
 type pipeline is array (0 to 3) of signed(7 downto 0);
 type type_coef          is array (0 to 3) of signed(7 downto 0);
 type type_mult           is array (0 to 3) of signed(15 downto 0);
-type type_sum        is array (0 to 1) of signed(15+1  downto 0);
+type type_sum        is array (0 to 1) of signed(15+1 downto 0);
 
 signal pipe : pipeline := (others=>(others=>'0'));
 signal coeficients : type_coef ;
@@ -93,20 +94,20 @@ end process;
 -- Proceso 3 para sumar los 4 coeficientes dos a dos (usad pipeline)
 process(clk)
 begin
-    sums(0) <= multiplications(0)+multiplications(1);
-    sums(1) <= multiplications(2)+multiplications(3);
+    sums(0) <= resize(multiplications(0) + multiplications(1), sums(0)'length);
+    sums(1) <= resize(multiplications(2)+ multiplications(3), sums(1)'length);
 end process;
 
 -- Proceso 4 para sumar las dos sumas del proceso 3
 process(clk)
 begin
-    final_sum <= sums(0)+sums(1);
+    final_sum <= resize(sums(0)+sums(1), final_sum'length);
 end process;
 
 -- Proceso 5 para asignar el resultado del proceso 4 a la salida
 process(clk)
 begin
-    o_data <= std_logic_vector(final_sum(17 downto 8));
+    o_data <= std_logic_vector(final_sum(16 downto 7));
 end process;
 
 end rtl;
