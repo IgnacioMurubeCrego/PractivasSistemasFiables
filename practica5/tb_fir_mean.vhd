@@ -1,6 +1,8 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+library std; 
+use std.textio.all;
 
 entity fir_filter_tb is
 end fir_filter_tb;
@@ -47,6 +49,9 @@ signal enable : std_logic := '0';
 signal w_data_test : std_logic_vector( 7 downto 0) := (others => '0');
 signal o_data : std_logic_vector( 9 downto 0) := (others => '0');
 
+  --variables para manejar los ficheros
+  file file_INPUT : text;
+
 begin
 
   --================================= 
@@ -87,102 +92,58 @@ port map(
 	   wait for clk_period/2;
 	end process;
 	
-	--=============================================
-	--Proceso de generacion de estimulos
-	--=============================================	
-	process is
-	begin
-		-- Secuencia de reset
-		wait until clk'event and clk = '1';
-		wait until clk'event and clk = '1';
-		rst <= '1';                         -- Reset inactivo
-		wait until clk'event and clk = '1';
-		rst <= '0';                         -- Reset activo
-		wait until clk'event and clk = '1';
-		rst <= '1';                         -- Reset inactivo
-		--Fin de secuencia de reset
-		wait for 100 us;
-		
-	end process;
-	
-	-- Needs to be modified.
-	process is 
-  --variables para manejar los ficheros
-  file file_INPUT : text;
-  file file_OUTPUT : text;
-  variable v_status_input: file_open_status;
-  variable v_status_output: file_open_status;
-  
-  variable v_ILINE: line; --Para almacenar cada linea del fichero
-  variable v_OLINE: line;
-  --Variables para los valores de entrada
-  variable v_RST: integer; --Valor del boton que obtendremos del fichero
-  variable v_BTNC: integer;
-  variable v_TIME: time;
-  
-  --Variables para los valores de salida
-  variable v_expected: std_logic;
-  variable v_LED: integer;
-  
-  begin 
-  
-  --Abrimos los ficheros con la instruccion file_open (punto 2.2.2)
-  file_open(v_status_input, file_INPUT, "../input.txt", read_mode);
-  file_open(v_status_output, file_OUTPUT, "../output.txt", write_mode);
-  
-  --2.2.3 Uso de assert para verificacion de seniales
-  
-  --Comprobamos que se abren correctamente, en caso contrario paramos la simulacion
-  assert v_status_input = open_ok 
-    report "El fichero input.txt no se ha abierto correctamente"
-    severity failure; --Con severity failure forzamos la simulacion a parar
-	
-  assert v_status_output = open_ok
-    report "El fichero output.txt no se ha abierto correctamente"
-    severity failure; --Con severity failure forzamos la simulacion a parar
-  
-  
-  --2.2.6
-   write(v_oline, string'("Simulation of top_practica1.vhd"));
-   writeline(file_OUTPUT, v_OLINE);
-
-    while (not endfile(file_INPUT)) loop
-		readline(file_INPUT, v_ILINE); --lee toda la linea
-		read(v_ILINE, v_TIME);         --lee hasta un espacio en blanco
-		read(v_ILINE, v_RST);
-		read(v_ILINE, v_BTNC);
-		read(v_ILINE, v_LED);
-		
-		--2.2.5
-		BTN <= to_unsigned(v_BTNC,1)(0); --Como es un std_logic se debe hacer con (v_btn, 1)(0), si fuera simple seria con (v_btn) solamente 
-		rst_n <= to_unsigned(v_RST,1)(0);
-		v_expected:= to_unsigned(v_LED,1)(0);
-		
-		wait for v_TIME;
-		
-		--2.2.6 Escribimos el reporte
-		write(v_OLINE, "Time: " & time'image(v_TIME) & "  rst_n: " & integer'image(v_RST) & "  BTNC: " & integer'image(v_BTNC)); --primero debemos escribir con write todos los valores en una linea
-		writeline(file_OUTPUT, v_OLINE); --despues de crear una linea se puede escribir en un archivo mediante writeline
-		
-		assert v_expected /= LED
-		  report "ERROR"
-		  severity note;
-		  
-		  if(v_expected = LED) then
-		      write(v_OLINE, "LED: " & integer'image(v_LED));
-		      writeline(file_OUTPUT, v_OLINE);
-		  else
-		      write(v_OLINE, "ERROR: " & "  Expected LED to be: " & integer'image(v_LED) &
-		      "  actual value: " & std_logic'image(LED));
-		      writeline(file_OUTPUT, v_OLINE);
-            end if;
-    end loop;
+    --=============================================
+    -- Proceso de generacion de estimulos
+    --=============================================
+    process is
     
-    write(v_oline, string'("END SIMULATION"));
-    writeline(file_OUTPUT, v_OLINE);
-     fin_sim <= true;
-    wait;
+      variable v_status_input: file_open_status;
+      variable v_ILINE: line; -- Para almacenar cada linea del fichero
     
-  end process;
+      -- Variables para los valores de entrada
+      variable v_TIME: time;
+      variable v_PATTERN: integer; -- Valor del boton que obtendremos del fichero
+    
+    begin
+    
+        -- Abrimos el fichero de entrada
+        file_open(v_status_input, file_INPUT, "../input.txt", read_mode);
+        
+        -- Verificamos que se abre correctamente, en caso contrario, paramos la simulacion
+        assert v_status_input = open_ok 
+            report "El fichero input.txt no se ha abierto correctamente"
+            severity failure;
+    
+        -- Secuencia de reset
+        wait until rising_edge(clk);
+        wait until rising_edge(clk);
+        rst <= '1';                         -- Reset activo
+        wait until rising_edge(clk);
+        rst <= '0';                         -- Reset inactivo
+        wait until rising_edge(clk);
+        rst <= '1';                         -- Reset activo
+        wait until rising_edge(clk);
+        
+        -- Leer y aplicar los estímulos desde el archivo de entrada
+        while not endfile(file_INPUT) loop
+            readline(file_INPUT, v_ILINE); -- Lee toda la línea
+            read(v_ILINE, v_TIME);         -- Lee hasta un espacio en blanco
+            read(v_ILINE, v_PATTERN);      -- Lee el patrón de estímulo
+            
+            -- Aplicar el patrón de estímulo
+            enable <= '1';                  -- Activar la señal de habilitación
+            pattern_sel <= v_PATTERN;       -- Configurar el selector de patrón
+            
+            -- Esperar hasta el próximo cambio de tiempo
+            wait for v_TIME;
+        end loop;
+    
+        -- Cerrar el archivo de entrada
+        file_close(file_INPUT);
+        
+        -- Esperar hasta el próximo cambio de reloj
+        wait;
+    
+    end process;
   
 end rtl;
